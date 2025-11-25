@@ -1,0 +1,99 @@
+import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { KKOKKO } from '@/constants'
+import { useAuth } from '@/hooks/useAuth'
+import { useImages } from '@/hooks/useImages'
+import { useStats } from '@/hooks/useStats'
+import { ImageUploader, ImageManager, LikeChart, AIGenerator } from '@/components/admin'
+import { Button } from '@/components/ui/button'
+
+type Tab = 'images' | 'stats' | 'ai'
+
+export function AdminPage() {
+  const navigate = useNavigate()
+  const { signOut } = useAuth()
+  const [activeTab, setActiveTab] = useState<Tab>('images')
+  const { images, isLoading, error, upload, remove, select, refresh } = useImages()
+  const { period, setPeriod, dailyStats, imageStats, isLoading: statsLoading } = useStats()
+
+  const handleLogout = async () => {
+    await signOut()
+    navigate('/')
+  }
+
+  return (
+    <div className="container mx-auto p-4">
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-2xl font-bold">{KKOKKO.NAME} 관리자 페이지</h1>
+        <Button variant="outline" onClick={handleLogout}>
+          로그아웃
+        </Button>
+      </div>
+
+      {error && (
+        <div className="bg-destructive/10 text-destructive p-3 rounded-lg mb-4">
+          {error}
+        </div>
+      )}
+
+      <div className="flex gap-2 mb-6">
+        <Button
+          variant={activeTab === 'images' ? 'default' : 'outline'}
+          onClick={() => setActiveTab('images')}
+        >
+          이미지 관리
+        </Button>
+        <Button
+          variant={activeTab === 'stats' ? 'default' : 'outline'}
+          onClick={() => setActiveTab('stats')}
+        >
+          통계
+        </Button>
+        <Button
+          variant={activeTab === 'ai' ? 'default' : 'outline'}
+          onClick={() => setActiveTab('ai')}
+        >
+          AI 생성
+        </Button>
+      </div>
+
+      {activeTab === 'images' && (
+        <div className="space-y-6">
+          <section>
+            <h2 className="text-xl font-semibold mb-4">이미지 업로드</h2>
+            <ImageUploader onUpload={upload} />
+          </section>
+          <section>
+            <h2 className="text-xl font-semibold mb-4">이미지 목록</h2>
+            <ImageManager
+              images={images}
+              isLoading={isLoading}
+              onDelete={remove}
+              onSelect={select}
+            />
+          </section>
+        </div>
+      )}
+
+      {activeTab === 'stats' && (
+        <section>
+          <h2 className="text-xl font-semibold mb-4">좋아요 통계</h2>
+          <LikeChart
+            dailyStats={dailyStats}
+            imageStats={imageStats}
+            period={period}
+            onPeriodChange={setPeriod}
+            isLoading={statsLoading}
+          />
+        </section>
+      )}
+
+      {activeTab === 'ai' && (
+        <section>
+          <h2 className="text-xl font-semibold mb-4">AI 이미지 생성</h2>
+          <AIGenerator onSaved={() => { refresh(); setActiveTab('images'); }} />
+        </section>
+      )}
+    </div>
+  )
+}
