@@ -14,7 +14,7 @@ export function LikeAnimation({ onAnimationEnd }: LikeAnimationProps) {
   return (
     <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
       <Heart
-        className="w-24 h-24 text-white fill-white drop-shadow-lg animate-like-heart"
+        className="w-24 h-24 text-red-500 fill-red-500 drop-shadow-lg animate-like-heart"
         strokeWidth={1}
       />
     </div>
