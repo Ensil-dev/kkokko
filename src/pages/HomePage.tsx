@@ -80,7 +80,7 @@ export function HomePage() {
         <div className="text-center">
           <p className="text-lg font-semibold mb-2">잠시만 기다려주세요!</p>
           <p className="text-muted-foreground">
-            {Math.ceil(remainingSeconds / 60)}분 후에 다시 좋아요를 누를 수 있어요
+            {Math.floor(remainingSeconds / 60)}분 {remainingSeconds % 60}초 후에 다시 좋아요를 누를 수 있어요
           </p>
         </div>
       </Modal>
