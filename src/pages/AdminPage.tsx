@@ -20,7 +20,18 @@ export function AdminPage() {
   const { period, setPeriod, dailyStats, imageStats, isLoading: statsLoading } = useStats()
   const { usage, isLoading: storageLoading, refresh: refreshStorage } = useStorage()
   const { totalLikes, refresh: refreshTotalLikes } = useTotalLikes()
-  const { visitors, totalCount, uniqueCount, isLoading: visitorsLoading, refresh: refreshVisitors } = useVisitors()
+  const {
+    visitors,
+    totalCount,
+    uniqueCount,
+    currentPage,
+    totalPages,
+    isLoading: visitorsLoading,
+    refresh: refreshVisitors,
+    goToPage,
+    nextPage,
+    prevPage,
+  } = useVisitors()
 
   const handleLogout = async () => {
     await signOut()
@@ -42,37 +53,39 @@ export function AdminPage() {
         </div>
       )}
 
-      <div className="flex gap-2 mb-6">
-        <Button
-          variant={activeTab === 'images' ? 'default' : 'outline'}
-          onClick={() => setActiveTab('images')}
-        >
-          이미지 관리
-        </Button>
-        <Button
-          variant={activeTab === 'ai' ? 'default' : 'outline'}
-          onClick={() => setActiveTab('ai')}
-        >
-          AI 생성
-        </Button>
-        <Button
-          variant={activeTab === 'storage' ? 'default' : 'outline'}
-          onClick={() => setActiveTab('storage')}
-        >
-          {KKOKKO.STORAGE_NAME}
-        </Button>
-        <Button
-          variant={activeTab === 'stats' ? 'default' : 'outline'}
-          onClick={() => setActiveTab('stats')}
-        >
-          좋아요 통계
-        </Button>
-        <Button
-          variant={activeTab === 'visitors' ? 'default' : 'outline'}
-          onClick={() => setActiveTab('visitors')}
-        >
-          사용자 통계
-        </Button>
+      <div className="overflow-x-auto -mx-4 px-4 mb-6 scrollbar-hide">
+        <div className="flex gap-2 w-max">
+          <Button
+            variant={activeTab === 'images' ? 'default' : 'outline'}
+            onClick={() => setActiveTab('images')}
+          >
+            이미지 관리
+          </Button>
+          <Button
+            variant={activeTab === 'ai' ? 'default' : 'outline'}
+            onClick={() => setActiveTab('ai')}
+          >
+            AI 생성
+          </Button>
+          <Button
+            variant={activeTab === 'storage' ? 'default' : 'outline'}
+            onClick={() => setActiveTab('storage')}
+          >
+            {KKOKKO.STORAGE_NAME}
+          </Button>
+          <Button
+            variant={activeTab === 'stats' ? 'default' : 'outline'}
+            onClick={() => setActiveTab('stats')}
+          >
+            좋아요 통계
+          </Button>
+          <Button
+            variant={activeTab === 'visitors' ? 'default' : 'outline'}
+            onClick={() => setActiveTab('visitors')}
+          >
+            사용자 통계
+          </Button>
+        </div>
       </div>
 
       {activeTab === 'images' && (
@@ -142,8 +155,13 @@ export function AdminPage() {
             visitors={visitors}
             totalCount={totalCount}
             uniqueCount={uniqueCount}
+            currentPage={currentPage}
+            totalPages={totalPages}
             isLoading={visitorsLoading}
             onRefresh={refreshVisitors}
+            onPageChange={goToPage}
+            onNextPage={nextPage}
+            onPrevPage={prevPage}
           />
         </section>
       )}
