@@ -1,10 +1,11 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { KKOKKO } from '@/constants'
 import type { Image } from '@/types'
 import { supabase } from '@/lib/supabase'
 import { ImageCard } from '@/components/image'
 import { Modal } from '@/components/ui/modal'
 import { useLikes } from '@/hooks/useLikes'
+import { recordVisitor } from '@/services/visitorService'
 
 export function HomePage() {
   const [image, setImage] = useState<Image | null>(null)
@@ -12,9 +13,16 @@ export function HomePage() {
   const [showCooldownModal, setShowCooldownModal] = useState(false)
   const [remainingSeconds, setRemainingSeconds] = useState(0)
   const { likeCount, like } = useLikes(image?.id ?? null)
+  const hasRecordedVisit = useRef(false)
 
   useEffect(() => {
     fetchSelectedImage()
+
+    // 방문자 정보 수집 (한 번만 실행)
+    if (!hasRecordedVisit.current) {
+      hasRecordedVisit.current = true
+      recordVisitor()
+    }
   }, [])
 
   const fetchSelectedImage = async () => {

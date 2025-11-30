@@ -5,10 +5,12 @@ import { useAuth } from '@/hooks/useAuth'
 import { useImages } from '@/hooks/useImages'
 import { useStats } from '@/hooks/useStats'
 import { useStorage } from '@/hooks/useStorage'
-import { ImageUploader, ImageManager, LikeChart, AIGenerator, StorageInfo } from '@/components/admin'
+import { useTotalLikes } from '@/hooks/useTotalLikes'
+import { useVisitors } from '@/hooks/useVisitors'
+import { ImageUploader, ImageManager, LikeChart, AIGenerator, StorageInfo, VisitorStats } from '@/components/admin'
 import { Button } from '@/components/ui/button'
 
-type Tab = 'images' | 'stats' | 'ai' | 'storage'
+type Tab = 'images' | 'stats' | 'ai' | 'storage' | 'visitors'
 
 export function AdminPage() {
   const navigate = useNavigate()
@@ -17,6 +19,8 @@ export function AdminPage() {
   const { images, isLoading, error, upload, remove, select, refresh } = useImages()
   const { period, setPeriod, dailyStats, imageStats, isLoading: statsLoading } = useStats()
   const { usage, isLoading: storageLoading, refresh: refreshStorage } = useStorage()
+  const { totalLikes, refresh: refreshTotalLikes } = useTotalLikes()
+  const { visitors, totalCount, uniqueCount, isLoading: visitorsLoading, refresh: refreshVisitors } = useVisitors()
 
   const handleLogout = async () => {
     await signOut()
@@ -63,20 +67,34 @@ export function AdminPage() {
         >
           좋아요 통계
         </Button>
+        <Button
+          variant={activeTab === 'visitors' ? 'default' : 'outline'}
+          onClick={() => setActiveTab('visitors')}
+        >
+          사용자 통계
+        </Button>
       </div>
 
       {activeTab === 'images' && (
         <div className="space-y-6">
           <section>
             <h2 className="text-xl font-semibold mb-4">이미지 업로드</h2>
-            <ImageUploader onUpload={upload} />
+            <ImageUploader onUpload={async (file, title) => {
+                const result = await upload(file, title)
+                if (result.success) refreshStorage()
+                return result
+              }} />
           </section>
           <section>
             <h2 className="text-xl font-semibold mb-4">이미지 목록</h2>
             <ImageManager
               images={images}
               isLoading={isLoading}
-              onDelete={remove}
+              onDelete={async (id) => {
+                const result = await remove(id)
+                if (result.success) refreshStorage()
+                return result
+              }}
               onSelect={select}
             />
           </section>
@@ -99,7 +117,10 @@ export function AdminPage() {
       {activeTab === 'ai' && (
         <section>
           <h2 className="text-xl font-semibold mb-4">AI 이미지 생성</h2>
-          <AIGenerator onSaved={() => { refresh(); setActiveTab('images'); }} />
+          <AIGenerator
+            totalLikes={totalLikes}
+            onSaved={() => { refresh(); refreshStorage(); refreshTotalLikes(); setActiveTab('images'); }}
+          />
         </section>
       )}
 
@@ -110,6 +131,19 @@ export function AdminPage() {
             usage={usage}
             isLoading={storageLoading}
             onRefresh={refreshStorage}
+          />
+        </section>
+      )}
+
+      {activeTab === 'visitors' && (
+        <section>
+          <h2 className="text-xl font-semibold mb-4">사용자 통계</h2>
+          <VisitorStats
+            visitors={visitors}
+            totalCount={totalCount}
+            uniqueCount={uniqueCount}
+            isLoading={visitorsLoading}
+            onRefresh={refreshVisitors}
           />
         </section>
       )}
