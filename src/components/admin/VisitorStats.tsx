@@ -138,10 +138,12 @@ export function VisitorStats({
   return (
     <div className="space-y-6">
       <div className="flex justify-end gap-2">
-        <Button variant="outline" size="sm" onClick={handleClear}>
-          <Trash2 className="w-4 h-4 mr-2" />
-          초기화
-        </Button>
+        {import.meta.env.DEV && (
+          <Button variant="outline" size="sm" onClick={handleClear}>
+            <Trash2 className="w-4 h-4 mr-2" />
+            초기화
+          </Button>
+        )}
         <Button variant="outline" size="sm" onClick={onRefresh}>
           <RefreshCw className="w-4 h-4 mr-2" />
           새로고침
@@ -290,7 +292,7 @@ export function VisitorStats({
                             </div>
                           </TableCell>
                           <TableCell>
-                            <span className="text-sm">{formatDeviceModel(visitor.device_model)}</span>
+                            <span className="text-sm">{formatDeviceModel(visitor.device_model, visitor.device_brand)}</span>
                           </TableCell>
                           <TableCell>
                             {isExpanded ? (

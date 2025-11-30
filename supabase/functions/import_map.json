@@ -1,0 +1,5 @@
+{
+  "imports": {
+    "node-device-detector": "npm:node-device-detector@2.2.4"
+  }
+}
