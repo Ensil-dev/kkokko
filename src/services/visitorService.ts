@@ -122,9 +122,11 @@ const SAMSUNG_MODELS: Record<string, string> = {
 }
 
 function getSamsungModelName(modelCode: string): string | null {
-  // SM-G965U → SM-G965 형태로 변환 (마지막 알파벳 제거)
-  // 숫자로 끝나면 그대로, 알파벳으로 끝나면 제거
-  const baseCode = /\d$/.test(modelCode) ? modelCode : modelCode.slice(0, -1)
+  // SM-S928U1 → SM-S928, SM-S9280 → SM-S928 형태로 변환
+  // 기본 모델 코드 추출: SM-X + 3자리 숫자까지만 사용
+  const match = modelCode.match(/^(SM-[A-Z]\d{3})/i)
+  if (!match) return null
+  const baseCode = match[1].toUpperCase()
   return SAMSUNG_MODELS[baseCode] ?? null
 }
 
@@ -158,8 +160,9 @@ function parseUserAgent(): { device: string; deviceModel: string | null; browser
   // Device 모델명
   let deviceModel: string | null = result.device.model ?? null
 
-  // 삼성 기기의 경우 모델 코드에서 이름 추출 (SM-G981B, SM-S928N 등)
-  const samsungMatch = ua.match(/SM-[A-Z]\d{3,4}[A-Z]?/i)
+  // 삼성 기기의 경우 모델 코드에서 이름 추출
+  // SM-S928U1, SM-S9280, SM-G981B 등 다양한 형식 지원
+  const samsungMatch = ua.match(/SM-[A-Z]\d{3,4}[A-Z]?\d?/i)
   if (samsungMatch) {
     const modelCode = samsungMatch[0].toUpperCase()
     const friendlyName = getSamsungModelName(modelCode)
