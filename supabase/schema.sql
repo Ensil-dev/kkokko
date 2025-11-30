@@ -1,17 +1,21 @@
 -- 꼬꼬 프로젝트 데이터베이스 스키마
 -- Supabase SQL Editor에서 실행
 
--- images 테이블
+-- images 테이블 (이미지 및 동영상 지원)
 CREATE TABLE IF NOT EXISTS images (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   url TEXT NOT NULL,
   storage_path TEXT NOT NULL,
   title TEXT,
+  media_type TEXT NOT NULL DEFAULT 'image' CHECK (media_type IN ('image', 'video')),
   is_selected BOOLEAN DEFAULT FALSE,
   is_ai_generated BOOLEAN DEFAULT FALSE,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
+
+-- 기존 테이블에 media_type 컬럼 추가 (마이그레이션용)
+-- ALTER TABLE images ADD COLUMN IF NOT EXISTS media_type TEXT NOT NULL DEFAULT 'image' CHECK (media_type IN ('image', 'video'));
 
 -- 선택된 이미지는 하나만 가능
 CREATE UNIQUE INDEX IF NOT EXISTS idx_single_selected

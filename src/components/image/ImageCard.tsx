@@ -1,5 +1,6 @@
 import { useRef, useState, useCallback } from 'react'
 import type { Image } from '@/types'
+import { isVideo } from '@/types'
 import { Card } from '@/components/ui/card'
 import { Heart } from 'lucide-react'
 import { LikeAnimation } from './LikeAnimation'
@@ -78,12 +79,23 @@ export function ImageCard({ image, likeCount, onDoubleTap }: ImageCardProps) {
         onClick={handleClick}
         onTouchEnd={handleTouchEnd}
       >
-        <img
-          src={image.url}
-          alt={image.title || '이미지'}
-          className="w-full aspect-square object-cover"
-          draggable={false}
-        />
+        {isVideo(image) ? (
+          <video
+            src={image.url}
+            className="w-full aspect-square object-cover"
+            autoPlay
+            loop
+            muted
+            playsInline
+          />
+        ) : (
+          <img
+            src={image.url}
+            alt={image.title || '이미지'}
+            className="w-full aspect-square object-cover"
+            draggable={false}
+          />
+        )}
         {showAnimation && <LikeAnimation onAnimationEnd={handleAnimationEnd} />}
       </div>
       <div className="p-4 flex items-center gap-2">

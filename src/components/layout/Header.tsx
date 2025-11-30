@@ -6,7 +6,7 @@ export function Header() {
     <header className="border-b">
       <div className="container mx-auto px-4 h-14 flex items-center justify-between">
         <Link to="/" className="font-bold text-lg">
-          {KKOKKO.NAME}
+          {KKOKKO.SITE_NAME}
         </Link>
         <nav className="flex items-center gap-4">
           <Link to="/login" className="text-sm text-muted-foreground hover:text-foreground">

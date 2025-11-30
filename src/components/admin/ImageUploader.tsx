@@ -3,6 +3,8 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent } from '@/components/ui/card'
+import { isAllowedFile, isVideoFile } from '@/services/imageService'
+import { SUPPORTED_FORMATS } from '@/constants'
 
 interface ImageUploaderProps {
   onUpload: (file: File, title?: string) => Promise<{ success: boolean }>
@@ -12,22 +14,30 @@ export function ImageUploader({ onUpload }: ImageUploaderProps) {
   const [isDragging, setIsDragging] = useState(false)
   const [preview, setPreview] = useState<string | null>(null)
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
+  const [isVideo, setIsVideo] = useState(false)
   const [title, setTitle] = useState('')
   const [isUploading, setIsUploading] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   const handleFile = useCallback((file: File) => {
-    if (!file.type.startsWith('image/')) {
-      alert('이미지 파일만 업로드할 수 있습니다.')
+    if (!isAllowedFile(file)) {
+      alert('이미지 또는 동영상 파일만 업로드할 수 있습니다.')
       return
     }
 
+    const isVideoType = isVideoFile(file)
     setSelectedFile(file)
-    const reader = new FileReader()
-    reader.onload = (e) => {
-      setPreview(e.target?.result as string)
+    setIsVideo(isVideoType)
+
+    if (isVideoType) {
+      setPreview(URL.createObjectURL(file))
+    } else {
+      const reader = new FileReader()
+      reader.onload = (e) => {
+        setPreview(e.target?.result as string)
+      }
+      reader.readAsDataURL(file)
     }
-    reader.readAsDataURL(file)
   }, [])
 
   const handleDragOver = useCallback((e: React.DragEvent) => {
@@ -70,8 +80,12 @@ export function ImageUploader({ onUpload }: ImageUploaderProps) {
     const result = await onUpload(selectedFile, title || undefined)
 
     if (result.success) {
+      if (preview && isVideo) {
+        URL.revokeObjectURL(preview)
+      }
       setPreview(null)
       setSelectedFile(null)
+      setIsVideo(false)
       setTitle('')
       if (fileInputRef.current) {
         fileInputRef.current.value = ''
@@ -81,8 +95,12 @@ export function ImageUploader({ onUpload }: ImageUploaderProps) {
   }
 
   const handleCancel = () => {
+    if (preview && isVideo) {
+      URL.revokeObjectURL(preview)
+    }
     setPreview(null)
     setSelectedFile(null)
+    setIsVideo(false)
     setTitle('')
     if (fileInputRef.current) {
       fileInputRef.current.value = ''
@@ -107,25 +125,33 @@ export function ImageUploader({ onUpload }: ImageUploaderProps) {
             <input
               ref={fileInputRef}
               type="file"
-              accept="image/*"
+              accept="image/*,video/*"
               onChange={handleFileSelect}
               className="hidden"
             />
             <p className="text-muted-foreground mb-2">
-              이미지를 드래그하거나 클릭하여 선택하세요
+              이미지 또는 동영상을 드래그하거나 클릭하여 선택하세요
             </p>
             <p className="text-sm text-muted-foreground/70">
-              JPG, PNG, GIF, WebP 지원
+              {SUPPORTED_FORMATS.ALL.join(', ')} 지원
             </p>
           </div>
         ) : (
           <div className="space-y-4">
             <div className="relative aspect-video bg-muted rounded-lg overflow-hidden">
-              <img
-                src={preview}
-                alt="미리보기"
-                className="w-full h-full object-contain"
-              />
+              {isVideo ? (
+                <video
+                  src={preview}
+                  controls
+                  className="w-full h-full object-contain"
+                />
+              ) : (
+                <img
+                  src={preview}
+                  alt="미리보기"
+                  className="w-full h-full object-contain"
+                />
+              )}
             </div>
             <div className="space-y-2">
               <Label htmlFor="title">제목 (선택)</Label>

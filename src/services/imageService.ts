@@ -1,7 +1,23 @@
 import { supabase } from '@/lib/supabase'
-import type { Image } from '@/types'
+import type { Image, MediaType } from '@/types'
 
 const BUCKET_NAME = 'resource'
+
+const IMAGE_MIME_TYPES = ['image/jpeg', 'image/png', 'image/gif', 'image/webp']
+const VIDEO_MIME_TYPES = ['video/mp4', 'video/webm', 'video/quicktime']
+const ALLOWED_MIME_TYPES = [...IMAGE_MIME_TYPES, ...VIDEO_MIME_TYPES]
+
+function getMediaType(mimeType: string): MediaType {
+  return VIDEO_MIME_TYPES.includes(mimeType) ? 'video' : 'image'
+}
+
+export function isAllowedFile(file: File): boolean {
+  return ALLOWED_MIME_TYPES.includes(file.type)
+}
+
+export function isVideoFile(file: File): boolean {
+  return VIDEO_MIME_TYPES.includes(file.type)
+}
 
 interface UploadResult {
   success: boolean
@@ -48,9 +64,14 @@ export async function getSelectedImage(): Promise<Image | null> {
 }
 
 export async function uploadImage(file: File, title?: string): Promise<UploadResult> {
+  if (!isAllowedFile(file)) {
+    return { success: false, error: '지원하지 않는 파일 형식입니다.' }
+  }
+
   const fileExt = file.name.split('.').pop()
   const fileName = `${crypto.randomUUID()}.${fileExt}`
   const storagePath = `uploads/${fileName}`
+  const mediaType = getMediaType(file.type)
 
   // Upload to Storage
   const { error: uploadError } = await supabase.storage
@@ -73,6 +94,7 @@ export async function uploadImage(file: File, title?: string): Promise<UploadRes
       url: urlData.publicUrl,
       storage_path: storagePath,
       title: title || null,
+      media_type: mediaType,
       is_selected: false,
       is_ai_generated: false,
     })
