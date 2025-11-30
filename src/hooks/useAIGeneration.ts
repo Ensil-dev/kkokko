@@ -1,5 +1,6 @@
 import { useState, useCallback } from 'react'
 import { generateImage, saveGeneratedImage } from '@/services/aiService'
+import { DEFAULT_CHARACTER } from '@/constants'
 import type { Image } from '@/types'
 
 interface UseAIGenerationReturn {
@@ -7,7 +8,7 @@ interface UseAIGenerationReturn {
   isGenerating: boolean
   isSaving: boolean
   error: string | null
-  generate: (prompt: string) => Promise<void>
+  generate: (prompt: string, characterId?: string) => Promise<void>
   save: (title?: string) => Promise<Image | null>
   clear: () => void
 }
@@ -18,7 +19,7 @@ export function useAIGeneration(): UseAIGenerationReturn {
   const [isSaving, setIsSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  const generate = useCallback(async (prompt: string) => {
+  const generate = useCallback(async (prompt: string, characterId: string = DEFAULT_CHARACTER.id) => {
     setError(null)
     setIsGenerating(true)
 
@@ -28,7 +29,7 @@ export function useAIGeneration(): UseAIGenerationReturn {
       setPreviewUrl(null)
     }
 
-    const result = await generateImage(prompt)
+    const result = await generateImage(prompt, characterId)
 
     if (result.success && result.imageUrl) {
       setPreviewUrl(result.imageUrl)

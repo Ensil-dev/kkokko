@@ -66,3 +66,16 @@ export async function getImageStats(): Promise<ImageChartData[]> {
     likes: (image.likes as unknown as { count: number }[])?.[0]?.count ?? 0,
   }))
 }
+
+export async function getTotalLikes(): Promise<number> {
+  const { count, error } = await supabase
+    .from('likes')
+    .select('*', { count: 'exact', head: true })
+
+  if (error) {
+    console.error('Failed to fetch total likes:', error.message)
+    return 0
+  }
+
+  return count ?? 0
+}
