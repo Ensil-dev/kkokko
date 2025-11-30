@@ -113,7 +113,7 @@ function ImageCard({ image, onDelete, onSelect }: ImageCardProps) {
             disabled={image.is_selected}
             className="flex-1 text-xs"
           >
-            {image.is_selected ? '선택됨' : '선택'}
+            {image.is_selected ? '선택됨' : '이미지 선택'}
           </Button>
           <Button
             size="sm"

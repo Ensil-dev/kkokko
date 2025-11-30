@@ -98,9 +98,14 @@ export function ImageCard({ image, likeCount, onDoubleTap }: ImageCardProps) {
         )}
         {showAnimation && <LikeAnimation onAnimationEnd={handleAnimationEnd} />}
       </div>
-      <div className="p-4 flex items-center gap-2">
-        <Heart className="w-5 h-5 text-red-500 fill-red-500" />
-        <span className="text-sm font-medium">{likeCount.toLocaleString()}</span>
+      <div className="p-4 space-y-2">
+        {image.title && (
+          <p className="font-medium text-foreground">{image.title}</p>
+        )}
+        <div className="flex items-center gap-2">
+          <Heart className="w-5 h-5 text-red-500 fill-red-500" />
+          <span className="text-sm font-medium">{likeCount.toLocaleString()}</span>
+        </div>
       </div>
     </Card>
   )

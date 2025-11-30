@@ -43,11 +43,16 @@ export function StorageInfo({ usage, isLoading, onRefresh }: StorageInfoProps) {
         <CardContent className="p-6">
           <h3 className="font-semibold mb-4">{KKOKKO.STORAGE_NAME} 사용량</h3>
           <div className="space-y-4">
-            <div className="flex justify-between text-sm">
+            <div className="flex justify-between items-center text-sm">
               <span className="text-muted-foreground">사용 중</span>
-              <span className="font-medium">
-                {formatBytes(usage.usedBytes)} / {formatBytes(usage.maxBytes)}
-              </span>
+              <div className="text-right">
+                <span className="font-medium">
+                  {formatBytes(usage.usedBytes)} / 1024 MB
+                </span>
+                <span className="ml-2 text-muted-foreground">
+                  ({usagePercent.toFixed(2)}%)
+                </span>
+              </div>
             </div>
             <div className="h-4 bg-muted rounded-full overflow-hidden">
               <div
@@ -61,9 +66,6 @@ export function StorageInfo({ usage, isLoading, onRefresh }: StorageInfoProps) {
                 style={{ width: `${Math.min(usagePercent, 100)}%` }}
               />
             </div>
-            <p className="text-sm text-muted-foreground text-center">
-              {usagePercent.toFixed(1)}% 사용 중
-            </p>
           </div>
         </CardContent>
       </Card>
@@ -97,7 +99,7 @@ export function StorageInfo({ usage, isLoading, onRefresh }: StorageInfoProps) {
         <CardContent className="p-4">
           <h3 className="font-semibold mb-2">참고</h3>
           <ul className="text-sm text-muted-foreground space-y-1">
-            <li>• Free 플랜 기준 최대 1GB까지 저장 가능</li>
+            <li>• Free 플랜 기준 최대 1.024GB까지 저장 가능</li>
             <li>• 파일 1개당 최대 50MB까지 업로드 가능</li>
             <li>• 지원 형식: {SUPPORTED_FORMATS.ALL.join(', ')}</li>
           </ul>

@@ -10,23 +10,26 @@ export interface StorageUsage {
   maxFileBytes: number
 }
 
+const STORAGE_FOLDERS = ['uploads', 'ai-generated']
+
 export async function getStorageUsage(): Promise<StorageUsage> {
-  const { data, error } = await supabase.storage.from(BUCKET_NAME).list('uploads', {
-    limit: 1000,
-  })
+  const results = await Promise.all(
+    STORAGE_FOLDERS.map((folder) =>
+      supabase.storage.from(BUCKET_NAME).list(folder, { limit: 1000 })
+    )
+  )
 
-  if (error) {
-    console.error('Failed to fetch storage usage:', error.message)
-    return {
-      usedBytes: 0,
-      maxBytes: STORAGE_LIMITS.MAX_TOTAL_BYTES,
-      fileCount: 0,
-      maxFileBytes: STORAGE_LIMITS.MAX_FILE_BYTES,
+  let usedBytes = 0
+  let fileCount = 0
+
+  for (const { data, error } of results) {
+    if (error) {
+      console.error('Failed to fetch storage usage:', error.message)
+      continue
     }
+    usedBytes += data?.reduce((acc, file) => acc + (file.metadata?.size || 0), 0) ?? 0
+    fileCount += data?.length ?? 0
   }
-
-  const usedBytes = data?.reduce((acc, file) => acc + (file.metadata?.size || 0), 0) ?? 0
-  const fileCount = data?.length ?? 0
 
   return {
     usedBytes,
@@ -37,11 +40,11 @@ export async function getStorageUsage(): Promise<StorageUsage> {
 }
 
 export function formatBytes(bytes: number): string {
-  if (bytes === 0) return '0 B'
+  if (bytes === 0) return '0 MB'
 
-  const units = ['B', 'KB', 'MB', 'GB']
-  const k = 1024
-  const i = Math.floor(Math.log(bytes) / Math.log(k))
+  const MB = 1024 * 1024
+  const value = bytes / MB
 
-  return `${(bytes / Math.pow(k, i)).toFixed(2)} ${units[i]}`
+  // MB 단위로 소수점 2자리까지 표시
+  return `${value.toFixed(2)} MB`
 }
