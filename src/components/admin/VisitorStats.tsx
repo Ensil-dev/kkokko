@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, Fragment } from 'react'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import {
@@ -263,9 +263,8 @@ export function VisitorStats({
                     const isExpanded = expandedRows.has(visitor.id)
 
                     return (
-                      <>
+                      <Fragment key={visitor.id}>
                         <TableRow
-                          key={visitor.id}
                           className="cursor-pointer hover:bg-muted/50"
                           onClick={() => toggleRow(visitor.id)}
                         >
@@ -325,7 +324,7 @@ export function VisitorStats({
                             </TableCell>
                           </TableRow>
                         )}
-                      </>
+                      </Fragment>
                     )
                   })}
                 </TableBody>
