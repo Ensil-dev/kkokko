@@ -285,3 +285,17 @@ export async function getUniqueVisitorCount(): Promise<number> {
   const uniqueIds = new Set(data?.map((v) => v.visitor_id))
   return uniqueIds.size
 }
+
+export async function clearAllVisitors(): Promise<boolean> {
+  const { error } = await supabase
+    .from('visitors')
+    .delete()
+    .gte('created_at', '1970-01-01')  // 모든 레코드 삭제
+
+  if (error) {
+    console.error('Failed to clear visitors:', error.message)
+    return false
+  }
+
+  return true
+}

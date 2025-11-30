@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react'
 import {
   getVisitors,
   getUniqueVisitorCount,
+  clearAllVisitors,
   type VisitorRecord,
 } from '@/services/visitorService'
 
@@ -16,6 +17,7 @@ interface UseVisitorsReturn {
   goToPage: (page: number) => Promise<void>
   nextPage: () => Promise<void>
   prevPage: () => Promise<void>
+  clearAll: () => Promise<boolean>
 }
 
 export function useVisitors(): UseVisitorsReturn {
@@ -69,6 +71,14 @@ export function useVisitors(): UseVisitorsReturn {
     await fetchVisitors(currentPage)
   }, [fetchVisitors, currentPage])
 
+  const clearAll = useCallback(async () => {
+    const success = await clearAllVisitors()
+    if (success) {
+      await fetchVisitors(1)
+    }
+    return success
+  }, [fetchVisitors])
+
   return {
     visitors,
     totalCount,
@@ -80,5 +90,6 @@ export function useVisitors(): UseVisitorsReturn {
     goToPage,
     nextPage,
     prevPage,
+    clearAll,
   }
 }

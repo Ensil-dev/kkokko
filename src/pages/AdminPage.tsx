@@ -31,6 +31,7 @@ export function AdminPage() {
     goToPage,
     nextPage,
     prevPage,
+    clearAll: clearVisitors,
   } = useVisitors()
 
   const handleLogout = async () => {
@@ -159,6 +160,7 @@ export function AdminPage() {
             totalPages={totalPages}
             isLoading={visitorsLoading}
             onRefresh={refreshVisitors}
+            onClear={clearVisitors}
             onPageChange={goToPage}
             onNextPage={nextPage}
             onPrevPage={prevPage}

@@ -9,7 +9,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
-import { RefreshCw, Monitor, Smartphone, Tablet, Users, Eye, ChevronDown, ChevronUp, UserCheck, UserPlus, ChevronLeft, ChevronRight } from 'lucide-react'
+import { RefreshCw, Monitor, Smartphone, Tablet, Users, Eye, ChevronDown, ChevronUp, UserCheck, UserPlus, ChevronLeft, ChevronRight, Trash2 } from 'lucide-react'
 import { formatDeviceModel, type VisitorRecord } from '@/services/visitorService'
 
 type DeviceFilter = 'all' | 'Mobile' | 'Desktop' | 'Tablet'
@@ -22,6 +22,7 @@ interface VisitorStatsProps {
   totalPages: number
   isLoading: boolean
   onRefresh: () => void
+  onClear: () => void
   onPageChange: (page: number) => void
   onNextPage: () => void
   onPrevPage: () => void
@@ -87,6 +88,7 @@ export function VisitorStats({
   totalPages,
   isLoading,
   onRefresh,
+  onClear,
   onPageChange,
   onNextPage,
   onPrevPage,
@@ -127,9 +129,19 @@ export function VisitorStats({
     })
   }
 
+  const handleClear = () => {
+    if (window.confirm('모든 방문자 기록을 삭제하시겠습니까?\n이 작업은 되돌릴 수 없습니다.')) {
+      onClear()
+    }
+  }
+
   return (
     <div className="space-y-6">
-      <div className="flex justify-end">
+      <div className="flex justify-end gap-2">
+        <Button variant="outline" size="sm" onClick={handleClear}>
+          <Trash2 className="w-4 h-4 mr-2" />
+          초기화
+        </Button>
         <Button variant="outline" size="sm" onClick={onRefresh}>
           <RefreshCw className="w-4 h-4 mr-2" />
           새로고침
