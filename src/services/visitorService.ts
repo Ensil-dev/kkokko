@@ -134,6 +134,9 @@ function getSamsungModelName(modelCode: string): string | null {
 export function formatDeviceModel(model: string | null): string {
   if (!model) return '-'
 
+  // 한 글자짜리 모델명은 무효 처리 (ua-parser-js 파싱 오류)
+  if (model.length === 1) return '-'
+
   // 삼성 모델 코드인 경우 변환 시도
   if (model.startsWith('SM-')) {
     const friendlyName = getSamsungModelName(model)
@@ -143,10 +146,40 @@ export function formatDeviceModel(model: string | null): string {
   return model
 }
 
-function parseUserAgent(): { device: string; deviceModel: string | null; browser: string; os: string } {
+async function getHighEntropyHints(): Promise<{ model: string | null; platform: string | null; platformVersion: string | null }> {
+  try {
+    // User-Agent Client Hints API (Chrome 90+, Edge 90+, Opera 76+)
+    const nav = navigator as Navigator & {
+      userAgentData?: {
+        getHighEntropyValues: (hints: string[]) => Promise<{
+          model?: string
+          platform?: string
+          platformVersion?: string
+        }>
+      }
+    }
+
+    if (nav.userAgentData?.getHighEntropyValues) {
+      const hints = await nav.userAgentData.getHighEntropyValues(['model', 'platform', 'platformVersion'])
+      return {
+        model: hints.model || null,
+        platform: hints.platform || null,
+        platformVersion: hints.platformVersion || null,
+      }
+    }
+  } catch {
+    // User-Agent Client Hints not supported or blocked
+  }
+  return { model: null, platform: null, platformVersion: null }
+}
+
+async function parseUserAgent(): Promise<{ device: string; deviceModel: string | null; browser: string; os: string }> {
   const ua = navigator.userAgent
   const parser = new UAParser(ua)
   const result = parser.getResult()
+
+  // User-Agent Client Hints로 정확한 정보 가져오기 시도
+  const hints = await getHighEntropyHints()
 
   // Device 타입
   let device = 'Desktop'
@@ -158,29 +191,48 @@ function parseUserAgent(): { device: string; deviceModel: string | null; browser
   }
 
   // Device 모델명
-  let deviceModel: string | null = result.device.model ?? null
+  let deviceModel: string | null = null
 
-  // 삼성 기기의 경우 모델 코드에서 이름 추출
-  // SM-S928U1, SM-S9280, SM-G981B 등 다양한 형식 지원
-  const samsungMatch = ua.match(/SM-[A-Z]\d{3,4}[A-Z]?\d?/i)
-  if (samsungMatch) {
-    const modelCode = samsungMatch[0].toUpperCase()
-    const friendlyName = getSamsungModelName(modelCode)
-    deviceModel = friendlyName ?? modelCode
+  // 1. User-Agent Client Hints에서 모델명 가져오기 (가장 정확)
+  if (hints.model && hints.model !== 'K' && hints.model.length > 1) {
+    // 삼성 모델 코드인 경우 친숙한 이름으로 변환
+    if (hints.model.startsWith('SM-')) {
+      deviceModel = getSamsungModelName(hints.model) ?? hints.model
+    } else {
+      deviceModel = hints.model
+    }
   }
 
-  // iPhone 모델명 보정
-  if (deviceModel === 'iPhone') {
-    deviceModel = 'iPhone'
+  // 2. User-Agent에서 삼성 모델 코드 추출 (fallback)
+  if (!deviceModel) {
+    const samsungMatch = ua.match(/SM-[A-Z]\d{3,4}[A-Z]?\d?/i)
+    if (samsungMatch) {
+      const modelCode = samsungMatch[0].toUpperCase()
+      deviceModel = getSamsungModelName(modelCode) ?? modelCode
+    }
+  }
+
+  // 3. ua-parser-js 결과 사용 (최후의 fallback)
+  if (!deviceModel) {
+    const parsedModel = result.device.model
+    // "K"는 UA Reduction으로 인한 placeholder이므로 무시
+    if (parsedModel && parsedModel !== 'K' && parsedModel.length > 1) {
+      deviceModel = parsedModel
+    }
   }
 
   // Browser
   const browser = result.browser.name ?? 'Unknown'
 
-  // OS (버전 포함)
-  const osName = result.os.name ?? 'Unknown'
-  const osVersion = result.os.version
-  const os = osVersion ? `${osName} ${osVersion}` : osName
+  // OS (버전 포함) - Client Hints 우선 사용
+  let os: string
+  if (hints.platform && hints.platformVersion) {
+    os = `${hints.platform} ${hints.platformVersion}`
+  } else {
+    const osName = result.os.name ?? 'Unknown'
+    const osVersion = result.os.version
+    os = osVersion ? `${osName} ${osVersion}` : osName
+  }
 
   return { device, deviceModel, browser, os }
 }
@@ -197,7 +249,7 @@ async function getIpAddress(): Promise<string | null> {
 
 export async function recordVisitor(): Promise<void> {
   const visitorId = getVisitorId()
-  const { device, deviceModel, browser, os } = parseUserAgent()
+  const { device, deviceModel, browser, os } = await parseUserAgent()
   const ipAddress = await getIpAddress()
 
   const payload = {
