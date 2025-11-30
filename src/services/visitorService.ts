@@ -156,10 +156,17 @@ export async function recordVisitor(): Promise<void> {
     }
   }
 
-  // 2. User-Agent Client Hints로 덮어쓰기 (더 정확한 정보)
+  // 2. User-Agent Client Hints로 보완 (더 정확한 정보)
   if (clientHints) {
-    // 모델명 (User-Agent Reduction 우회)
-    if (clientHints.model && clientHints.model !== 'K' && clientHints.model.length > 1) {
+    // 모델명: Edge Function에서 이미 마케팅 이름으로 변환된 경우 덮어쓰지 않음
+    // Edge Function이 raw 모델(SM-S928N)을 마케팅 이름(Galaxy S24 Ultra)으로 변환함
+    // Client Hints는 raw 모델명만 제공하므로, 변환된 이름이 있으면 유지
+    const isAlreadyConverted = deviceModel && !deviceModel.startsWith('SM-') &&
+                               !deviceModel.startsWith('LM-') &&
+                               !deviceModel.match(/^[A-Z]{2,3}\d{4}/) // OnePlus, Xiaomi 등 raw 패턴
+
+    if (!isAlreadyConverted && clientHints.model && clientHints.model !== 'K' && clientHints.model.length > 1) {
+      // Edge Function에서 변환 실패한 경우에만 Client Hints 값 사용
       deviceModel = clientHints.model
     }
 
