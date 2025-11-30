@@ -190,34 +190,15 @@ async function parseUserAgent(): Promise<{ device: string; deviceModel: string |
     device = 'Tablet'
   }
 
-  // Device 모델명
+  // Device 모델명 - User-Agent Client Hints API 사용 (Chromium 브라우저 전용)
   let deviceModel: string | null = null
 
-  // 1. User-Agent Client Hints에서 모델명 가져오기 (가장 정확)
   if (hints.model && hints.model !== 'K' && hints.model.length > 1) {
     // 삼성 모델 코드인 경우 친숙한 이름으로 변환
     if (hints.model.startsWith('SM-')) {
       deviceModel = getSamsungModelName(hints.model) ?? hints.model
     } else {
       deviceModel = hints.model
-    }
-  }
-
-  // 2. User-Agent에서 삼성 모델 코드 추출 (fallback)
-  if (!deviceModel) {
-    const samsungMatch = ua.match(/SM-[A-Z]\d{3,4}[A-Z]?\d?/i)
-    if (samsungMatch) {
-      const modelCode = samsungMatch[0].toUpperCase()
-      deviceModel = getSamsungModelName(modelCode) ?? modelCode
-    }
-  }
-
-  // 3. ua-parser-js 결과 사용 (최후의 fallback)
-  if (!deviceModel) {
-    const parsedModel = result.device.model
-    // "K"는 UA Reduction으로 인한 placeholder이므로 무시
-    if (parsedModel && parsedModel !== 'K' && parsedModel.length > 1) {
-      deviceModel = parsedModel
     }
   }
 
