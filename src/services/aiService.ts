@@ -5,6 +5,63 @@ import type { Image } from '@/types'
 
 const BUCKET_NAME = 'resource'
 
+// 한글 → 영어 색상 매핑
+const COLOR_MAP: Record<string, string> = {
+  // 한글
+  '빨간': 'red',
+  '빨강': 'red',
+  '파란': 'blue',
+  '파랑': 'blue',
+  '초록': 'green',
+  '녹색': 'green',
+  '노란': 'yellow',
+  '노랑': 'yellow',
+  '주황': 'orange',
+  '보라': 'purple',
+  '분홍': 'pink',
+  '핑크': 'pink',
+  '검은': 'black',
+  '검정': 'black',
+  '하얀': 'white',
+  '하양': 'white',
+  '흰': 'white',
+  '회색': 'gray',
+  '갈색': 'brown',
+  '금색': 'gold',
+  '은색': 'silver',
+  '무지개': 'rainbow',
+  // 영어 (그대로 유지)
+  'red': 'red',
+  'blue': 'blue',
+  'green': 'green',
+  'yellow': 'yellow',
+  'orange': 'orange',
+  'purple': 'purple',
+  'pink': 'pink',
+  'black': 'black',
+  'white': 'white',
+  'gray': 'gray',
+  'grey': 'gray',
+  'brown': 'brown',
+  'cyan': 'cyan',
+  'magenta': 'magenta',
+  'gold': 'gold',
+  'silver': 'silver',
+  'rainbow': 'rainbow',
+  'pastel': 'pastel',
+  'neon': 'neon',
+}
+
+function extractColorFromPrompt(prompt: string): string | null {
+  const lowerPrompt = prompt.toLowerCase()
+  for (const [keyword, englishColor] of Object.entries(COLOR_MAP)) {
+    if (lowerPrompt.includes(keyword.toLowerCase())) {
+      return englishColor
+    }
+  }
+  return null
+}
+
 interface GenerateResult {
   success: boolean
   imageUrl?: string
@@ -18,7 +75,12 @@ interface SaveResult {
 }
 
 export async function generateImage(userPrompt: string): Promise<GenerateResult> {
-  const fullPrompt = `${KKOKKO.AI_PROMPT_PREFIX} ${userPrompt}`
+  const detectedColor = extractColorFromPrompt(userPrompt)
+
+  // 색상이 감지되면 해당 색상을 강조하고, 아니면 기본 프롬프트 사용
+  const fullPrompt = detectedColor
+    ? `${detectedColor} colored baby chick, ${detectedColor} feathers, kawaii style, adorable, ${userPrompt}`
+    : `${KKOKKO.AI_PROMPT_PREFIX}, ${userPrompt}`
 
   try {
     const blob = await hf.textToImage(
