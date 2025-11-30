@@ -30,6 +30,11 @@ dist-ssr
 
 # Claude Code
 .claude
+CLAUDE.md
+
+# Supabase local
+supabase/.temp/
+supabase/migrations/
 
 # Vercel
 .vercel
