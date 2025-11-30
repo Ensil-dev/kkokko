@@ -4,10 +4,11 @@ import { KKOKKO } from '@/constants'
 import { useAuth } from '@/hooks/useAuth'
 import { useImages } from '@/hooks/useImages'
 import { useStats } from '@/hooks/useStats'
-import { ImageUploader, ImageManager, LikeChart, AIGenerator } from '@/components/admin'
+import { useStorage } from '@/hooks/useStorage'
+import { ImageUploader, ImageManager, LikeChart, AIGenerator, StorageInfo } from '@/components/admin'
 import { Button } from '@/components/ui/button'
 
-type Tab = 'images' | 'stats' | 'ai'
+type Tab = 'images' | 'stats' | 'ai' | 'storage'
 
 export function AdminPage() {
   const navigate = useNavigate()
@@ -15,6 +16,7 @@ export function AdminPage() {
   const [activeTab, setActiveTab] = useState<Tab>('images')
   const { images, isLoading, error, upload, remove, select, refresh } = useImages()
   const { period, setPeriod, dailyStats, imageStats, isLoading: statsLoading } = useStats()
+  const { usage, isLoading: storageLoading, refresh: refreshStorage } = useStorage()
 
   const handleLogout = async () => {
     await signOut()
@@ -24,7 +26,7 @@ export function AdminPage() {
   return (
     <div className="container mx-auto p-4">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">{KKOKKO.NAME} 관리자 페이지</h1>
+        <h1 className="text-2xl font-bold">관리자 페이지</h1>
         <Button variant="outline" onClick={handleLogout}>
           로그아웃
         </Button>
@@ -44,16 +46,22 @@ export function AdminPage() {
           이미지 관리
         </Button>
         <Button
-          variant={activeTab === 'stats' ? 'default' : 'outline'}
-          onClick={() => setActiveTab('stats')}
-        >
-          통계
-        </Button>
-        <Button
           variant={activeTab === 'ai' ? 'default' : 'outline'}
           onClick={() => setActiveTab('ai')}
         >
           AI 생성
+        </Button>
+        <Button
+          variant={activeTab === 'storage' ? 'default' : 'outline'}
+          onClick={() => setActiveTab('storage')}
+        >
+          {KKOKKO.STORAGE_NAME}
+        </Button>
+        <Button
+          variant={activeTab === 'stats' ? 'default' : 'outline'}
+          onClick={() => setActiveTab('stats')}
+        >
+          좋아요 통계
         </Button>
       </div>
 
@@ -92,6 +100,17 @@ export function AdminPage() {
         <section>
           <h2 className="text-xl font-semibold mb-4">AI 이미지 생성</h2>
           <AIGenerator onSaved={() => { refresh(); setActiveTab('images'); }} />
+        </section>
+      )}
+
+      {activeTab === 'storage' && (
+        <section>
+          <h2 className="text-xl font-semibold mb-4">{KKOKKO.STORAGE_NAME} 대시보드</h2>
+          <StorageInfo
+            usage={usage}
+            isLoading={storageLoading}
+            onRefresh={refreshStorage}
+          />
         </section>
       )}
     </div>
