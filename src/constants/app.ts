@@ -26,7 +26,25 @@ export const AI_CHARACTERS: AICharacterConfig[] = [
     id: 'chicken',
     label: '꼬꼬 닭',
     prompt: 'cute chicken, kawaii style, adorable, hen',
-    unlockThreshold: 1000,
+    unlockThreshold: 25,
+  },
+  {
+    id: 'seagull',
+    label: '꼬꼬 갈매기',
+    prompt: 'cute seagull, kawaii style, adorable, white bird, ocean bird',
+    unlockThreshold: 50,
+  },
+  {
+    id: 'parrot',
+    label: '꼬꼬 앵무새',
+    prompt: 'cute parrot, kawaii style, adorable, colorful feathers',
+    unlockThreshold: 75,
+  },
+  {
+    id: 'crow',
+    label: '꼬꼬 까마귀',
+    prompt: 'cute crow, kawaii style, adorable, black bird, raven',
+    unlockThreshold: 100,
   },
 ]
 
