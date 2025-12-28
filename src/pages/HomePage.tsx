@@ -1,4 +1,5 @@
 import { useEffect, useState, useRef } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { KKOKKO } from '@/constants'
 import type { Image } from '@/types'
 import { supabase } from '@/lib/supabase'
@@ -7,13 +8,19 @@ import { Modal } from '@/components/ui/modal'
 import { useLikes } from '@/hooks/useLikes'
 import { recordVisitor } from '@/services/visitorService'
 
+const SECRET_TAP_COUNT = 5
+const SECRET_TAP_TIMEOUT = 2000
+
 export function HomePage() {
+  const navigate = useNavigate()
   const [image, setImage] = useState<Image | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [showCooldownModal, setShowCooldownModal] = useState(false)
   const [remainingSeconds, setRemainingSeconds] = useState(0)
   const { likeCount, like } = useLikes(image?.id ?? null)
   const hasRecordedVisit = useRef(false)
+  const tapCountRef = useRef(0)
+  const tapTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   useEffect(() => {
     fetchSelectedImage()
@@ -50,6 +57,24 @@ export function HomePage() {
     return result.success
   }
 
+  const handleTitleClick = () => {
+    tapCountRef.current += 1
+
+    if (tapTimerRef.current) {
+      clearTimeout(tapTimerRef.current)
+    }
+
+    if (tapCountRef.current >= SECRET_TAP_COUNT) {
+      tapCountRef.current = 0
+      navigate('/login')
+      return
+    }
+
+    tapTimerRef.current = setTimeout(() => {
+      tapCountRef.current = 0
+    }, SECRET_TAP_TIMEOUT)
+  }
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-[80vh]">
@@ -61,7 +86,12 @@ export function HomePage() {
   if (!image) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[80vh] p-4">
-        <h1 className="text-4xl font-bold mb-4">{KKOKKO.TITLE}</h1>
+        <h1
+          className="text-4xl font-bold mb-4 select-none cursor-default"
+          onClick={handleTitleClick}
+        >
+          {KKOKKO.TITLE}
+        </h1>
         <p className="text-muted-foreground text-center">
           {KKOKKO.DESCRIPTION}
         </p>
@@ -73,8 +103,13 @@ export function HomePage() {
   }
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-[80vh] p-4">
-      <h1 className="text-2xl font-bold mb-6">{KKOKKO.TITLE}</h1>
+    <div className="flex flex-col items-center justify-center min-h-screen p-4">
+      <h1
+        className="text-2xl font-bold mb-6 select-none cursor-default"
+        onClick={handleTitleClick}
+      >
+        {KKOKKO.TITLE}
+      </h1>
       <ImageCard
         image={image}
         likeCount={likeCount}
