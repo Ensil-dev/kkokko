@@ -7,7 +7,7 @@ export function LoginPage() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
+      <div className="flex items-center justify-center min-h-[80vh]">
         <p className="text-muted-foreground">로딩 중...</p>
       </div>
     )
@@ -19,7 +19,7 @@ export function LoginPage() {
   }
 
   return (
-    <div className="flex items-center justify-center min-h-screen p-4">
+    <div className="flex items-center justify-center min-h-[80vh] p-4">
       <LoginForm />
     </div>
   )
