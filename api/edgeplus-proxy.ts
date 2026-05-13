@@ -34,7 +34,15 @@ export async function handleEdgePlusProxy(
       },
       body,
     })
-    return { status: upstream.status, body: await upstream.text() }
+    const respBody = await upstream.text()
+    if (!upstream.ok) {
+      console.error(
+        `[edgeplus-proxy] upstream ${upstream.status} for site=${SITE_KEY}`,
+        `secretPrefix=${secretKey.slice(0, 6)}…(len=${secretKey.length})`,
+        `body=${respBody.slice(0, 500)}`,
+      )
+    }
+    return { status: upstream.status, body: respBody }
   } catch (err) {
     console.error('[edgeplus-proxy] forward failed:', err)
     return { status: 502, body: JSON.stringify({ error: 'Bad gateway' }) }
