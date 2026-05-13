@@ -116,7 +116,7 @@ function FeatureRequestModal({ onClose }: ModalProps) {
       onClick={onClose}
     >
       <div
-        className="bg-card w-full sm:max-w-md sm:rounded-2xl rounded-t-2xl shadow-2xl animate-in fade-in slide-in-from-bottom-4 sm:zoom-in-95 duration-200 max-h-[92vh] flex flex-col"
+        className="bg-card w-full sm:max-w-md sm:rounded-2xl rounded-t-2xl overflow-hidden shadow-2xl animate-in fade-in slide-in-from-bottom-4 sm:zoom-in-95 duration-200 max-h-[92vh] flex flex-col"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="bg-card border-b px-5 py-4 flex items-start justify-between gap-2 flex-shrink-0">
