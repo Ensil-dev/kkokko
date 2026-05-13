@@ -7,7 +7,7 @@ import { useStats } from '@/hooks/useStats'
 import { useStorage } from '@/hooks/useStorage'
 import { useTotalLikes } from '@/hooks/useTotalLikes'
 import { useVisitors } from '@/hooks/useVisitors'
-import { ImageUploader, ImageManager, LikeChart, AIGenerator, StorageInfo, VisitorStats } from '@/components/admin'
+import { ImageUploader, ImageManager, LikeChart, AIGenerator, StorageInfo, VisitorStats, FeatureRequestFAB } from '@/components/admin'
 import { Button } from '@/components/ui/button'
 
 type Tab = 'images' | 'stats' | 'ai' | 'storage' | 'visitors'
@@ -167,6 +167,8 @@ export function AdminPage() {
           />
         </section>
       )}
+
+      <FeatureRequestFAB />
     </div>
   )
 }
