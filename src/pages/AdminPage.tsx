@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { track } from '@edgeplus/sdk'
 import { KKOKKO } from '@/constants'
 import { useAuth } from '@/hooks/useAuth'
 import { useImages } from '@/hooks/useImages'
@@ -39,6 +40,11 @@ export function AdminPage() {
     navigate('/')
   }
 
+  const switchTab = (tab: Tab) => {
+    setActiveTab(tab)
+    track('admin_tab', { tab })
+  }
+
   return (
     <div className="container mx-auto p-4">
       <div className="flex justify-between items-center mb-6">
@@ -58,31 +64,31 @@ export function AdminPage() {
         <div className="flex gap-2 w-max">
           <Button
             variant={activeTab === 'images' ? 'default' : 'outline'}
-            onClick={() => setActiveTab('images')}
+            onClick={() => switchTab('images')}
           >
             이미지 관리
           </Button>
           <Button
             variant={activeTab === 'ai' ? 'default' : 'outline'}
-            onClick={() => setActiveTab('ai')}
+            onClick={() => switchTab('ai')}
           >
             AI 생성
           </Button>
           <Button
             variant={activeTab === 'storage' ? 'default' : 'outline'}
-            onClick={() => setActiveTab('storage')}
+            onClick={() => switchTab('storage')}
           >
             {KKOKKO.STORAGE_NAME}
           </Button>
           <Button
             variant={activeTab === 'stats' ? 'default' : 'outline'}
-            onClick={() => setActiveTab('stats')}
+            onClick={() => switchTab('stats')}
           >
             좋아요 통계
           </Button>
           <Button
             variant={activeTab === 'visitors' ? 'default' : 'outline'}
-            onClick={() => setActiveTab('visitors')}
+            onClick={() => switchTab('visitors')}
           >
             사용자 통계
           </Button>

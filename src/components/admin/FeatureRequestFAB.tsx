@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { ChevronDown, MessageCirclePlus, Sparkles, X } from 'lucide-react'
+import { track } from '@edgeplus/sdk'
 import { FEATURE_REQUEST } from '@/constants'
 import { submitFeatureRequest } from '@/services/featureRequestService'
 import { Button } from '@/components/ui/button'
@@ -100,6 +101,8 @@ function FeatureRequestModal({ onClose }: ModalProps) {
       reason: reason.trim(),
     })
     if (result.success) {
+      const titlePreset = (F.TITLE.OPTIONS as readonly string[]).includes(title.trim())
+      track('feature_request_sent', { titlePreset })
       setStatus('success')
     } else {
       setStatus('error')

@@ -1,4 +1,5 @@
 import { useState, useRef, useCallback } from 'react'
+import { track } from '@edgeplus/sdk'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -78,6 +79,7 @@ export function ImageUploader({ onUpload }: ImageUploaderProps) {
 
     setIsUploading(true)
     const result = await onUpload(selectedFile, title || undefined)
+    track('image_uploaded', { mediaType: isVideo ? 'video' : 'image', success: result.success })
 
     if (result.success) {
       if (preview && isVideo) {

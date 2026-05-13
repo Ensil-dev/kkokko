@@ -1,4 +1,5 @@
 import { useState, useCallback } from 'react'
+import { track } from '@edgeplus/sdk'
 import { generateImage, saveGeneratedImage } from '@/services/aiService'
 import { DEFAULT_CHARACTER } from '@/constants'
 import type { Image } from '@/types'
@@ -29,7 +30,9 @@ export function useAIGeneration(): UseAIGenerationReturn {
       setPreviewUrl(null)
     }
 
+    const startedAt = Date.now()
     const result = await generateImage(prompt, characterId)
+    const durationMs = Date.now() - startedAt
 
     if (result.success && result.imageUrl) {
       setPreviewUrl(result.imageUrl)
@@ -37,6 +40,7 @@ export function useAIGeneration(): UseAIGenerationReturn {
       setError(result.error ?? '이미지 생성에 실패했습니다.')
     }
 
+    track('ai_generation_done', { characterId, success: result.success, durationMs })
     setIsGenerating(false)
   }, [previewUrl])
 
@@ -56,6 +60,7 @@ export function useAIGeneration(): UseAIGenerationReturn {
       URL.revokeObjectURL(previewUrl)
       setPreviewUrl(null)
       setIsSaving(false)
+      track('ai_generation_saved', { hasTitle: !!title })
       return result.image
     } else {
       setError(result.error ?? '이미지 저장에 실패했습니다.')
@@ -67,6 +72,7 @@ export function useAIGeneration(): UseAIGenerationReturn {
   const clear = useCallback(() => {
     if (previewUrl) {
       URL.revokeObjectURL(previewUrl)
+      track('ai_generation_discarded')
     }
     setPreviewUrl(null)
     setError(null)

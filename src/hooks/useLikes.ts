@@ -54,6 +54,8 @@ export function useLikes(imageId: string | null) {
     if (result.success) {
       setLikeCount((prev) => prev + 1)
       track('like', { imageId })
+    } else if (result.remainingSeconds !== undefined) {
+      track('like_rate_limit_hit', { imageId, remainingSeconds: result.remainingSeconds })
     }
 
     return { success: result.success, remainingSeconds: result.remainingSeconds }
