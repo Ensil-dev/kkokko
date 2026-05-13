@@ -1,9 +1,12 @@
 /**
- * EdgePlus 서버 프록시 모드.
+ * EdgePlus 서버 프록시 모드 (secret-only).
  *
  * 브라우저가 직접 collect.edgeplus.pro 로 요청을 보내면 secret_key 가 노출되거나
  * origin 등록을 사이트마다 해야 한다. 프록시 모드는 본 사이트의 server function
  * 이 대신 호출 — secret_key 는 환경변수로만 주입되어 클라이언트로 새지 않는다.
+ *
+ * SDK 0.0.15+ 가 site_key 를 body/header 모두에서 제외하고, collector 는
+ * X-Secret-Key 하나로 사이트를 식별한다. site_key 노출 경로가 완전히 차단된다.
  *
  * Vercel 환경변수에 `EDGEPLUS_SECRET_KEY` 등록 필요.
  *
@@ -11,7 +14,6 @@
  */
 
 const COLLECTOR_URL = 'https://collect.edgeplus.pro/api/collect'
-const SITE_KEY = 'ep_site_kkokko'
 
 export const config = { runtime: 'edge' }
 
@@ -29,7 +31,6 @@ export async function handleEdgePlusProxy(
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'X-Site-Key': SITE_KEY,
         'X-Secret-Key': secretKey,
       },
       body,
@@ -37,7 +38,7 @@ export async function handleEdgePlusProxy(
     const respBody = await upstream.text()
     if (!upstream.ok) {
       console.error(
-        `[edgeplus-proxy] upstream ${upstream.status} for site=${SITE_KEY}`,
+        `[edgeplus-proxy] upstream ${upstream.status}`,
         `secretPrefix=${secretKey.slice(0, 6)}…(len=${secretKey.length})`,
         `body=${respBody.slice(0, 500)}`,
       )

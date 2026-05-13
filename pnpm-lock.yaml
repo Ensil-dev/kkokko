@@ -12,8 +12,8 @@ importers:
   .:
     dependencies:
       '@edgeplus/sdk':
-        specifier: 0.0.14
-        version: 0.0.14
+        specifier: 0.0.15
+        version: 0.0.15
       '@huggingface/inference':
         specifier: ^4.13.4
         version: 4.13.4
@@ -191,8 +191,8 @@ packages:
     resolution: {integrity: sha512-qQ5m48eI/MFLQ5PxQj4PFaprjyCTLI37ElWMmNs0K8Lk3dVeOdNpB3ks8jc7yM5CDmVC73eMVk/trk3fgmrUpA==}
     engines: {node: '>=6.9.0'}
 
-  '@edgeplus/sdk@0.0.14':
-    resolution: {integrity: sha512-QBJluOqfAs4GF0tcDW71Wq3dWatrngNVkB++NXtkMAS+hLdwxmEHnnri9yH+qAgoBCheNM7k9gDATXmearLZSw==}
+  '@edgeplus/sdk@0.0.15':
+    resolution: {integrity: sha512-Pzj+Q2wOil4o43ganydVRjCYGENBHcODjqVTaHEVB775FfZMI/YhWDDdF33A3s084CunqMmlFxZsR+k5kz7a2Q==}
 
   '@emnapi/core@1.7.1':
     resolution: {integrity: sha512-o1uhUASyo921r2XtHYOHy7gdkGLge8ghBEQHMWmyJFoXlpU58kIrhhN3w26lpQb6dspetweapMn2CSNwQ8I4wg==}
@@ -1827,7 +1827,7 @@ snapshots:
       '@babel/helper-string-parser': 7.27.1
       '@babel/helper-validator-identifier': 7.28.5
 
-  '@edgeplus/sdk@0.0.14':
+  '@edgeplus/sdk@0.0.15':
     dependencies:
       web-vitals: 4.2.4
 
