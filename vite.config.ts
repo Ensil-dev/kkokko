@@ -57,8 +57,8 @@ function apiDevPlugin(env: Record<string, string>): Plugin {
         }
       })
 
-      // /api/edgeplus-proxy — EdgePlus collector 로 forward (secret_key 주입)
-      server.middlewares.use('/api/edgeplus-proxy', async (req, res) => {
+      // /api/edgeplus.pro — EdgePlus collector 로 forward (secret_key 주입)
+      server.middlewares.use('/api/edgeplus.pro', async (req, res) => {
         if (req.method !== 'POST') {
           res.statusCode = 405
           res.setHeader('Content-Type', 'application/json')
@@ -73,7 +73,7 @@ function apiDevPlugin(env: Record<string, string>): Plugin {
         }
         try {
           const raw = await readBody(req)
-          const mod = await server.ssrLoadModule('/api/edgeplus-proxy.ts')
+          const mod = await server.ssrLoadModule('/api/edgeplus.pro.ts')
           const { handleEdgePlusProxy } = mod as {
             handleEdgePlusProxy: (
               body: string,
