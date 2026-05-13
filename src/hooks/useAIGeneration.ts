@@ -1,7 +1,7 @@
 import { useState, useCallback } from 'react'
 import { track } from '@edgeplus/sdk'
 import { generateImage, saveGeneratedImage } from '@/services/aiService'
-import { DEFAULT_CHARACTER } from '@/constants'
+import { DEFAULT_CHARACTER, getCharacterById } from '@/constants'
 import type { Image } from '@/types'
 
 interface UseAIGenerationReturn {
@@ -40,7 +40,8 @@ export function useAIGeneration(): UseAIGenerationReturn {
       setError(result.error ?? '이미지 생성에 실패했습니다.')
     }
 
-    track('ai_generation_done', { characterId, success: result.success, durationMs })
+    const characterLabel = getCharacterById(characterId)?.label ?? characterId
+    track('ai_generation_done', { characterId, characterLabel, success: result.success, durationMs })
     setIsGenerating(false)
   }, [previewUrl])
 

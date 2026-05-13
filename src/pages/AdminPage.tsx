@@ -13,6 +13,14 @@ import { Button } from '@/components/ui/button'
 
 type Tab = 'images' | 'stats' | 'ai' | 'storage' | 'visitors'
 
+const TAB_LABELS: Record<Tab, string> = {
+  images: '이미지 관리',
+  ai: 'AI 생성',
+  storage: KKOKKO.STORAGE_NAME,
+  stats: '좋아요 통계',
+  visitors: '사용자 통계',
+}
+
 export function AdminPage() {
   const navigate = useNavigate()
   const { signOut } = useAuth()
@@ -42,7 +50,7 @@ export function AdminPage() {
 
   const switchTab = (tab: Tab) => {
     setActiveTab(tab)
-    track('admin_tab', { tab })
+    track('admin_tab', { tab, label: TAB_LABELS[tab] })
   }
 
   return (

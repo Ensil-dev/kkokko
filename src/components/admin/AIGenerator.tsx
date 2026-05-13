@@ -31,7 +31,7 @@ export function AIGenerator({ onSaved, totalLikes }: AIGeneratorProps) {
       try {
         if (localStorage.getItem(key)) continue
         localStorage.setItem(key, '1')
-        track('unlock_milestone', { characterId: char.id, threshold: char.unlockThreshold })
+        track('unlock_milestone', { characterId: char.id, characterLabel: char.label, threshold: char.unlockThreshold })
       } catch {
         // localStorage 막힘 (private mode 등) — dedup 포기, 발화도 스킵
       }
@@ -40,7 +40,7 @@ export function AIGenerator({ onSaved, totalLikes }: AIGeneratorProps) {
 
   const handleGenerate = async () => {
     if (!prompt.trim()) return
-    track('ai_generation_start', { characterId: selectedCharacter.id, promptLength: prompt.trim().length })
+    track('ai_generation_start', { characterId: selectedCharacter.id, characterLabel: selectedCharacter.label, promptLength: prompt.trim().length })
     await generate(prompt.trim(), selectedCharacter.id)
   }
 
