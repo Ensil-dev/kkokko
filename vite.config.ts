@@ -78,9 +78,14 @@ function apiDevPlugin(env: Record<string, string>): Plugin {
             handleEdgePlusProxy: (
               body: string,
               secretKey: string,
+              ctx?: { userAgent?: string; clientIp?: string; clientCountry?: string },
             ) => Promise<{ status: number; body: string }>
           }
-          const result = await handleEdgePlusProxy(raw, env.EDGEPLUS_SECRET_KEY)
+          // dev 환경은 localhost — IP/country 의미 적지만 UA 는 보존.
+          const userAgent = req.headers['user-agent'] as string | undefined
+          const result = await handleEdgePlusProxy(raw, env.EDGEPLUS_SECRET_KEY, {
+            userAgent,
+          })
           res.statusCode = result.status
           res.setHeader('Content-Type', 'application/json')
           res.end(result.body)

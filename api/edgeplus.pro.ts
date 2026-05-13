@@ -8,6 +8,10 @@
  * SDK 0.0.15+ 가 site_key 를 body/header 모두에서 제외하고, collector 는
  * X-Secret-Key 하나로 사이트를 식별한다. site_key 노출 경로가 완전히 차단된다.
  *
+ * client 의 UA/IP/country 는 Vercel Edge runtime 이 server-to-server fetch 시
+ * 자기 정체로 덮어쓰므로, trusted X-EP-Forwarded-* 헤더로 명시 forward 한다.
+ * collector 가 secret-only 경로일 때 이 헤더들을 우선 사용한다.
+ *
  * Vercel 환경변수에 `EDGEPLUS_SECRET_KEY` 등록 필요.
  *
  * 핵심 forward 로직은 `handleEdgePlusProxy` 로 분리되어 있어 vite dev 미들웨어와 공유한다.
@@ -22,19 +26,30 @@ export interface ProxyResult {
   body: string
 }
 
+export interface ForwardCtx {
+  userAgent?: string
+  clientIp?: string
+  clientCountry?: string
+}
+
 export async function handleEdgePlusProxy(
   body: string,
   secretKey: string,
+  ctx?: ForwardCtx,
 ): Promise<ProxyResult> {
   try {
-    const upstream = await fetch(COLLECTOR_URL, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-Secret-Key': secretKey,
-      },
-      body,
-    })
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+      'X-Secret-Key': secretKey,
+    }
+    if (ctx?.userAgent) {
+      headers['User-Agent'] = ctx.userAgent
+      headers['X-EP-Forwarded-UA'] = ctx.userAgent
+    }
+    if (ctx?.clientIp) headers['X-EP-Forwarded-IP'] = ctx.clientIp
+    if (ctx?.clientCountry) headers['X-EP-Forwarded-Country'] = ctx.clientCountry
+
+    const upstream = await fetch(COLLECTOR_URL, { method: 'POST', headers, body })
     const respBody = await upstream.text()
     if (!upstream.ok) {
       console.error(
@@ -60,8 +75,17 @@ export default async function handler(req: Request): Promise<Response> {
     return json({ error: 'EDGEPLUS_SECRET_KEY not configured' }, 500)
   }
 
+  const userAgent = req.headers.get('user-agent') ?? undefined
+  // Vercel 은 x-real-ip / x-forwarded-for / x-vercel-forwarded-for 다 채워서 보낸다.
+  const clientIp =
+    req.headers.get('x-real-ip') ??
+    req.headers.get('x-forwarded-for')?.split(',')[0].trim() ??
+    undefined
+  // x-vercel-ip-country = Vercel 의 CF-IPCountry 대응 (2-letter ISO).
+  const clientCountry = req.headers.get('x-vercel-ip-country') ?? undefined
+
   const body = await req.text()
-  const result = await handleEdgePlusProxy(body, secretKey)
+  const result = await handleEdgePlusProxy(body, secretKey, { userAgent, clientIp, clientCountry })
 
   return new Response(result.body, {
     status: result.status,
