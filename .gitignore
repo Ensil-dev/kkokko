@@ -42,3 +42,4 @@ supabase/migrations/
 
 # TypeScript cache
 *.tsbuildinfoTASK.md
+.gstack/
