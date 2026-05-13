@@ -1,8 +1,19 @@
 import { useState, useEffect, useCallback } from 'react'
 import type { User, Session } from '@supabase/supabase-js'
+import { identify, reset } from '@edgeplus/sdk'
 import { supabase } from '@/lib/supabase'
 
 const ADMIN_EMAIL = import.meta.env.VITE_ADMIN_EMAIL
+
+function syncEdgePlusIdentity(user: User | null) {
+  if (user?.email) {
+    identify(user.email, {
+      role: user.email === ADMIN_EMAIL ? 'admin' : 'user',
+    })
+  } else {
+    reset()
+  }
+}
 
 interface AuthState {
   user: User | null
@@ -22,23 +33,31 @@ export function useAuth() {
   useEffect(() => {
     // 현재 세션 가져오기
     supabase.auth.getSession().then(({ data: { session } }) => {
+      const user = session?.user ?? null
       setState({
-        user: session?.user ?? null,
+        user,
         session,
         isLoading: false,
-        isAdmin: session?.user?.email === ADMIN_EMAIL,
+        isAdmin: user?.email === ADMIN_EMAIL,
       })
+      syncEdgePlusIdentity(user)
     })
 
     // 인증 상태 변경 리스너
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (_event, session) => {
+      (event, session) => {
+        const user = session?.user ?? null
         setState({
-          user: session?.user ?? null,
+          user,
           session,
           isLoading: false,
-          isAdmin: session?.user?.email === ADMIN_EMAIL,
+          isAdmin: user?.email === ADMIN_EMAIL,
         })
+        if (event === 'SIGNED_OUT') {
+          reset()
+        } else if (event === 'SIGNED_IN' || event === 'USER_UPDATED') {
+          syncEdgePlusIdentity(user)
+        }
       }
     )
 

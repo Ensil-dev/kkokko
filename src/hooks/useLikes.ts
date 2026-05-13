@@ -1,4 +1,5 @@
 import { useEffect, useState, useCallback } from 'react'
+import { track } from '@edgeplus/sdk'
 import { supabase } from '@/lib/supabase'
 import { getLikeCount, addLike } from '@/services/likeService'
 import { getVisitorId } from '@/utils/visitor'
@@ -52,6 +53,7 @@ export function useLikes(imageId: string | null) {
     // 낙관적 업데이트: 성공 시 즉시 카운트 증가
     if (result.success) {
       setLikeCount((prev) => prev + 1)
+      track('like', { imageId })
     }
 
     return { success: result.success, remainingSeconds: result.remainingSeconds }
