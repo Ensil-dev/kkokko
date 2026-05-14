@@ -12,8 +12,8 @@ importers:
   .:
     dependencies:
       '@edgeplus/sdk':
-        specifier: 0.0.18
-        version: 0.0.18(rolldown-vite@7.2.5(@types/node@24.10.1)(jiti@2.6.1))
+        specifier: 0.0.19
+        version: 0.0.19(rolldown-vite@7.2.5(@types/node@24.10.1)(jiti@2.6.1))
       '@huggingface/inference':
         specifier: ^4.13.4
         version: 4.13.4
@@ -191,8 +191,8 @@ packages:
     resolution: {integrity: sha512-qQ5m48eI/MFLQ5PxQj4PFaprjyCTLI37ElWMmNs0K8Lk3dVeOdNpB3ks8jc7yM5CDmVC73eMVk/trk3fgmrUpA==}
     engines: {node: '>=6.9.0'}
 
-  '@edgeplus/sdk@0.0.18':
-    resolution: {integrity: sha512-GP5mlVzuCxZNORkiamw1iRids2r8N+q+JCseOv858cE6kbz1BrUsu6AqKE+48bJzbJ+UjEMSa/ViQaBmDgQQOA==}
+  '@edgeplus/sdk@0.0.19':
+    resolution: {integrity: sha512-RUFdcZOESfRCjgVAWd9vJuD54VL4qpJzruw3S7R5M1lhX+nb53tCHFY4YoiAeU73KwS4hNLMdOMeTycC/ydv3A==}
     peerDependencies:
       vite: ^5.0.0 || ^6.0.0 || ^7.0.0 || ^8.0.0
     peerDependenciesMeta:
@@ -1829,7 +1829,7 @@ snapshots:
       '@babel/helper-string-parser': 7.27.1
       '@babel/helper-validator-identifier': 7.28.5
 
-  '@edgeplus/sdk@0.0.18(rolldown-vite@7.2.5(@types/node@24.10.1)(jiti@2.6.1))':
+  '@edgeplus/sdk@0.0.19(rolldown-vite@7.2.5(@types/node@24.10.1)(jiti@2.6.1))':
     dependencies:
       web-vitals: 5.2.0
     optionalDependencies:

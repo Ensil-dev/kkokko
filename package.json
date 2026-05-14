@@ -10,7 +10,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@edgeplus/sdk": "0.0.18",
+    "@edgeplus/sdk": "0.0.19",
     "@huggingface/inference": "^4.13.4",
     "@radix-ui/react-dialog": "^1.1.15",
     "@radix-ui/react-label": "^2.1.8",
