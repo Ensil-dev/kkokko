@@ -53,9 +53,17 @@ export function FeatureRequestFAB() {
           onClick={() => setMenuOpen((v) => !v)}
           aria-label={FEATURE_REQUEST.FAB_LABEL}
           aria-expanded={menuOpen}
-          className="h-14 w-14 rounded-full bg-primary text-primary-foreground shadow-lg hover:bg-primary/90 active:scale-95 transition-all flex items-center justify-center"
+          className="relative h-14 w-14 rounded-full bg-primary text-primary-foreground shadow-lg hover:bg-primary/90 active:scale-95 transition-all flex items-center justify-center"
         >
-          {menuOpen ? <X className="size-6" /> : <MessageCirclePlus className="size-6" />}
+          {!menuOpen && (
+            <span
+              aria-hidden
+              className="absolute inset-0 rounded-full bg-primary opacity-75 motion-safe:animate-ping motion-safe:[animation-duration:2s]"
+            />
+          )}
+          <span className="relative flex items-center justify-center">
+            {menuOpen ? <X className="size-6" /> : <MessageCirclePlus className="size-6" />}
+          </span>
         </button>
       </div>
 
