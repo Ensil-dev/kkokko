@@ -1,14 +1,17 @@
 /**
- * 새 기능 요청 메일 발송 API.
+ * 새 기능 요청 저장 + 메일 발송 API.
  *
  * Vercel 환경변수 필요:
  * - RESEND_API_KEY   : Resend 대시보드에서 발급
  * - RECIPIENT_EMAIL  : 수신자 (기본값 dlwjd164@gmail.com)
  * - SENDER_EMAIL     : 발신자 (기본값 onboarding@resend.dev — 도메인 검증 전엔 이것만 가능)
+ * - VITE_SUPABASE_URL / VITE_SUPABASE_ANON_KEY : feature_requests 테이블 저장용
  *
  * 핵심 로직은 `handleFeatureRequest` 로 분리되어 있어 vite dev 미들웨어와 공유한다.
+ * DB 저장을 먼저 하므로 메일 발송이 실패해도 요청 내역은 남는다.
  */
 
+import { createClient } from '@supabase/supabase-js'
 import { Resend } from 'resend'
 
 export const config = { runtime: 'edge' }
@@ -34,6 +37,8 @@ interface HandlerEnv {
   apiKey: string
   recipient: string
   sender: string
+  supabaseUrl?: string
+  supabaseKey?: string
 }
 
 export interface HandlerResult {
@@ -61,6 +66,9 @@ export async function handleFeatureRequest(
   ) {
     return { status: 400, body: { error: '입력이 너무 길어요.' } }
   }
+
+  // 메일보다 먼저 저장 — 메일이 실패해도 요청 내역은 남아야 한다.
+  await saveRequest({ name, title, description, reason }, env)
 
   try {
     // subject 는 단일 라인 + 100자 컷 (본문에는 원문 그대로 들어감)
@@ -108,6 +116,8 @@ export default async function handler(req: Request): Promise<Response> {
     apiKey,
     recipient: process.env.RECIPIENT_EMAIL || DEFAULT_RECIPIENT,
     sender: process.env.SENDER_EMAIL || DEFAULT_SENDER,
+    supabaseUrl: process.env.VITE_SUPABASE_URL,
+    supabaseKey: process.env.VITE_SUPABASE_ANON_KEY,
   })
   return json(result.body, result.status)
 }
@@ -124,6 +134,28 @@ interface FormData {
   title: string
   description: string
   reason: string
+}
+
+/** feature_requests 테이블에 저장. 실패해도 메일 발송은 계속 진행한다. */
+async function saveRequest(data: FormData, env: HandlerEnv): Promise<void> {
+  if (!env.supabaseUrl || !env.supabaseKey) {
+    console.warn('[feature-request] supabase env 없음 — DB 저장 스킵')
+    return
+  }
+  try {
+    const supabase = createClient(env.supabaseUrl, env.supabaseKey)
+    const { error } = await supabase.from('feature_requests').insert({
+      name: data.name,
+      title: data.title,
+      description: data.description,
+      reason: data.reason || null,
+    })
+    if (error) {
+      console.error('[feature-request] insert error:', error)
+    }
+  } catch (err) {
+    console.error('[feature-request] insert failed:', err)
+  }
 }
 
 function buildText({ name, title, description, reason }: FormData): string {

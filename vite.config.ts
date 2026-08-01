@@ -42,7 +42,13 @@ function apiDevPlugin(env: Record<string, string>): Plugin {
           const { handleFeatureRequest } = mod as {
             handleFeatureRequest: (
               p: unknown,
-              env: { apiKey: string; recipient: string; sender: string },
+              env: {
+                apiKey: string
+                recipient: string
+                sender: string
+                supabaseUrl?: string
+                supabaseKey?: string
+              },
             ) => Promise<{ status: number; body: unknown }>
           }
 
@@ -50,6 +56,8 @@ function apiDevPlugin(env: Record<string, string>): Plugin {
             apiKey: env.RESEND_API_KEY,
             recipient: env.RECIPIENT_EMAIL || 'dlwjd164@gmail.com',
             sender: env.SENDER_EMAIL || 'kkokko <onboarding@resend.dev>',
+            supabaseUrl: env.VITE_SUPABASE_URL,
+            supabaseKey: env.VITE_SUPABASE_ANON_KEY,
           })
           sendJson(result.status, result.body)
         } catch (err) {
